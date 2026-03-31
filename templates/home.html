@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}DepScan — Dependency Vulnerability Scanner{% endblock %}
+{% block meta_description %}Upload package.json, requirements.txt, go.mod and more to scan live CVEs instantly. Free summary + $1.99 full fix report.{% endblock %}
+
+{% block extra_head %}
+<link rel="canonical" href="https://depscan.tinyship.ai/">
+<script src="https://js.stripe.com/v3/"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-16">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Dependency Vulnerability Scanner for Modern Stacks</h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">Drop one dependency file from npm, Python, Go, Ruby, PHP, Rust, or Java and get live CVE findings from OSV in seconds.</p>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-lg p-8 mb-12">
+        <form id="main-form" method="post" enctype="multipart/form-data" class="space-y-5">
+            {% csrf_token %}
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Dependency file type</label>
+                <select name="file_type" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500">
+                    <option value="package.json">package.json (Node.js)</option>
+                    <option value="requirements.txt">requirements.txt (Python)</option>
+                    <option value="go.mod">go.mod (Go)</option>
+                    <option value="Gemfile">Gemfile (Ruby)</option>
+                    <option value="composer.json">composer.json (PHP)</option>
+                    <option value="Cargo.toml">Cargo.toml (Rust)</option>
+                    <option value="pom.xml">pom.xml (Java)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Upload dependency file</label>
+                <input type="file" name="dependency_file" required class="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500" />
+                <p class="text-sm text-gray-500 mt-2">Free: live scan + top findings. Paid ($1.99): AI migration fixes + full report.</p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-3">
+                <button type="button" id="scan-free-btn" class="w-full bg-gray-900 text-white py-3 px-6 rounded-lg font-semibold hover:bg-black transition">Run Free Scan</button>
+                {% if staff_bypass %}
+                <button type="button" id="scan-paid-btn" class="w-full bg-emerald-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-emerald-700 transition">Staff Bypass: Full Report</button>
+                {% else %}
+                <button type="button" id="scan-paid-btn" class="w-full bg-emerald-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-emerald-700 transition">Unlock Full Report — $1.99</button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <div id="results" class="hidden bg-white rounded-2xl shadow-lg p-8 mb-12">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">Scan Results</h2>
+        <div id="results-content" class="space-y-4 text-sm"></div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8 mb-16">
+        <div class="text-center p-6 bg-white rounded-xl shadow">
+            <div class="text-4xl mb-3">🧪</div>
+            <h3 class="font-semibold text-lg mb-2">Multi-Ecosystem Parsing</h3>
+            <p class="text-gray-600">One scanner for npm, pip, Go modules, Ruby gems, Composer packages, Cargo crates, and Maven artifacts.</p>
+        </div>
+        <div class="text-center p-6 bg-white rounded-xl shadow">
+            <div class="text-4xl mb-3">🚨</div>
+            <h3 class="font-semibold text-lg mb-2">Live CVE Intelligence</h3>
+            <p class="text-gray-600">Every package is checked against OSV advisories in real time with severity scoring and suggested fixed versions.</p>
+        </div>
+        <div class="text-center p-6 bg-white rounded-xl shadow">
+            <div class="text-4xl mb-3">🛠️</div>
+            <h3 class="font-semibold text-lg mb-2">Actionable Fix Plan</h3>
+            <p class="text-gray-600">Paid mode adds AI migration guidance and change-risk watchouts so teams can patch faster without breaking builds.</p>
+        </div>
+    </div>
+
+    <div class="mb-16">
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-8">Frequently Asked Questions</h2>
+        <div class="space-y-4">
+            <details class="bg-white rounded-lg shadow p-4">
+                <summary class="font-semibold cursor-pointer">Does DepScan use a static vulnerability list?</summary>
+                <p class="mt-2 text-gray-600">No. Each scan queries OSV in real time, so you get current advisories instead of stale database snapshots.</p>
+            </details>
+            <details class="bg-white rounded-lg shadow p-4">
+                <summary class="font-semibold cursor-pointer">Can I scan private repositories?</summary>
+                <p class="mt-2 text-gray-600">Yes. You upload only the dependency file, not your source code.</p>
+            </details>
+            <details class="bg-white rounded-lg shadow p-4">
+                <summary class="font-semibold cursor-pointer">What do I get in the paid report?</summary>
+                <p class="mt-2 text-gray-600">You unlock AI migration tips for vulnerable packages, breaking-change watchouts, and expanded output for remediation planning.</p>
+            </details>
+        </div>
+    </div>
+</div>
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+            "@type": "Question",
+            "name": "Does DepScan use a static vulnerability list?",
+            "acceptedAnswer": {"@type": "Answer", "text": "No. Each scan queries OSV in real time, so you get current advisories instead of stale database snapshots."}
+        },
+        {
+            "@type": "Question",
+            "name": "Can I scan private repositories?",
+            "acceptedAnswer": {"@type": "Answer", "text": "Yes. You upload only the dependency file, not your source code."}
+        },
+        {
+            "@type": "Question",
+            "name": "What do I get in the paid report?",
+            "acceptedAnswer": {"@type": "Answer", "text": "You unlock AI migration tips for vulnerable packages, breaking-change watchouts, and expanded output for remediation planning."}
+        }
+    ]
+}
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const form = document.getElementById('main-form');
+const freeBtn = document.getElementById('scan-free-btn');
+const paidBtn = document.getElementById('scan-paid-btn');
+const results = document.getElementById('results');
+const resultsContent = document.getElementById('results-content');
+const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+
+function badgeClass(sev) {
+  if (sev === 'CRITICAL') return 'bg-red-100 text-red-800';
+  if (sev === 'HIGH') return 'bg-orange-100 text-orange-800';
+  if (sev === 'MEDIUM') return 'bg-yellow-100 text-yellow-800';
+  if (sev === 'LOW') return 'bg-blue-100 text-blue-800';
+  return 'bg-gray-100 text-gray-800';
+}
+
+function renderResult(data) {
+  const s = data.summary;
+  const findings = data.top_findings || [];
+
+  let html = `
+    <div class="grid sm:grid-cols-5 gap-3">
+      <div class="p-3 bg-gray-100 rounded"><strong>Score</strong><br>${s.security_score}/100</div>
+      <div class="p-3 bg-red-50 rounded"><strong>Critical</strong><br>${s.critical}</div>
+      <div class="p-3 bg-orange-50 rounded"><strong>High</strong><br>${s.high}</div>
+      <div class="p-3 bg-yellow-50 rounded"><strong>Medium</strong><br>${s.medium}</div>
+      <div class="p-3 bg-blue-50 rounded"><strong>Low</strong><br>${s.low}</div>
+    </div>
+    <div class="text-gray-600">Dependencies scanned: ${s.dependencies_scanned}</div>
+    <div class="border rounded-lg overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50"><tr><th class="text-left p-2">Package</th><th class="text-left p-2">Issue</th><th class="text-left p-2">Severity</th><th class="text-left p-2">Fix</th></tr></thead>
+        <tbody>
+          ${findings.slice(0,10).map(f => `<tr class="border-t"><td class="p-2">${f.package}@${f.version}</td><td class="p-2">${f.id}<br><span class="text-gray-500">${f.summary || ''}</span></td><td class="p-2"><span class="px-2 py-1 rounded ${badgeClass(f.severity)}">${f.severity}</span></td><td class="p-2">${f.fixed_version || 'N/A'}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  if (data.full_report_unlocked && data.ai_fix_suggestions?.length) {
+    html += `<div><h3 class="font-bold text-lg">AI Migration Suggestions</h3><div class="space-y-2">${data.ai_fix_suggestions.map(i => `<div class="p-3 bg-emerald-50 rounded"><strong>${i.package || 'Package'}</strong><br>${i.advice || ''}<br><em>${i.breaking_changes_watchouts || ''}</em></div>`).join('')}</div></div>`;
+  } else if (data.upgrade_message) {
+    html += `<div class="p-3 bg-emerald-50 rounded text-emerald-800">${data.upgrade_message}</div>`;
+  }
+
+  resultsContent.innerHTML = html;
+  results.classList.remove('hidden');
+  results.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
+async function runScan(paymentIntentId = '') {
+  const fd = new FormData(form);
+  if (paymentIntentId) fd.append('payment_intent_id', paymentIntentId);
+
+  const res = await fetch('/analyze/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': csrfToken},
+    body: fd,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Scan failed');
+  renderResult(data);
+}
+
+freeBtn.addEventListener('click', async () => {
+  try {
+    freeBtn.disabled = true;
+    freeBtn.textContent = 'Scanning...';
+    await runScan('');
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    freeBtn.disabled = false;
+    freeBtn.textContent = 'Run Free Scan';
+  }
+});
+
+paidBtn.addEventListener('click', async () => {
+  try {
+    paidBtn.disabled = true;
+    paidBtn.textContent = 'Preparing...';
+
+    {% if staff_bypass %}
+    await runScan('staff-bypass');
+    {% else %}
+    const piRes = await fetch('/create-payment-intent/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': csrfToken},
+    });
+    const piData = await piRes.json();
+    if (!piRes.ok) throw new Error(piData.error || 'Payment setup failed');
+
+    const stripe = Stripe('{{ stripe_publishable_key }}');
+    const result = await stripe.confirmCardPayment(piData.clientSecret, {
+      payment_method: {
+        card: {
+          token: 'tok_visa'
+        }
+      }
+    });
+
+    if (result.error) throw new Error(result.error.message || 'Payment failed');
+    await runScan(piData.paymentIntentId || result.paymentIntent.id);
+    {% endif %}
+  } catch (e) {
+    alert(e.message);
+  } finally {
+    paidBtn.disabled = false;
+    paidBtn.textContent = {% if staff_bypass %}'Staff Bypass: Full Report'{% else %}'Unlock Full Report — $1.99'{% endif %};
+  }
+});
+</script>
+{% endblock %}

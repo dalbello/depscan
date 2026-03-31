@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DepScan — Dependency Vulnerability Scanner{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Upload dependency files and scan live CVEs instantly across npm, pip, Go, Ruby, PHP, Rust, and Java.{% endblock %}">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://depscan.tinyship.ai/">
+    <meta property="og:title" content="DepScan — Dependency Vulnerability Scanner">
+    <meta property="og:description" content="Scan package.json, requirements.txt, go.mod and more against live CVE data.">
+    <meta property="og:image" content="https://depscan.tinyship.ai/static/img/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="DepScan">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DepScan — Dependency Vulnerability Scanner">
+    <meta name="twitter:description" content="Scan package.json, requirements.txt, go.mod and more against live CVE data.">
+    <meta name="twitter:image" content="https://depscan.tinyship.ai/static/img/og-image.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script defer src="https://umami.app-ninja.com/script.js" data-website-id="CHANGEME_UMAMI_ID"></script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 min-h-screen">
+    {% block content %}{% endblock %}
+
+    <footer class="bg-gray-900 text-gray-400 py-8 mt-16">
+        <div class="max-w-4xl mx-auto px-4 text-center text-sm">
+            <p>&copy; 2026 <a href="https://tinyship.ai" class="text-emerald-400 hover:text-emerald-300">tinyship.ai</a></p>
+            <p class="mt-2">
+                <a href="/privacy/" class="hover:text-white">Privacy</a> ·
+                <a href="/terms/" class="hover:text-white">Terms</a>
+            </p>
+        </div>
+    </footer>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
